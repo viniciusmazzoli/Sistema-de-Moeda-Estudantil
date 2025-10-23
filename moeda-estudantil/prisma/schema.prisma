@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PROFESSOR
+  ALUNO
+  EMPRESA
+}
+
+enum TransactionType {
+  GRANT
+  REDEEM
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+
+  alunoId     String?
+  aluno       Aluno?           @relation(fields: [alunoId], references: [id])
+  professorId String?
+  professor   Professor?       @relation(fields: [professorId], references: [id])
+  empresaId   String?
+  empresa     EmpresaParceira? @relation(fields: [empresaId], references: [id])
+}
+
+model Instituicao {
+  id        String   @id @default(uuid())
+  nome      String
+  endereco  String
+  createdAt DateTime @default(now())
+
+  alunos      Aluno[]
+  professores Professor[]
+}
+
+model Aluno {
+  id           String   @id @default(uuid())
+  nome         String
+  email        String   @unique
+  cpf          String   @unique
+  rg           String
+  endereco     String
+  curso        String
+  saldoMoedas  Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  instituicaoId String?
+  instituicao   Instituicao? @relation(fields: [instituicaoId], references: [id])
+
+  user          User[]
+
+  recebimentos  Transaction[] @relation("AlunoRecebimento")
+  resgates      Transaction[] @relation("AlunoResgate")
+}
+
+model Professor {
+  id               String   @id @default(uuid())
+  nome             String
+  cpf              String   @unique
+  departamento     String
+  saldoMoedas      Int      @default(0)
+  lastAllocationAt DateTime?
+  createdAt        DateTime @default(now())
+
+  instituicaoId String?
+  instituicao   Instituicao? @relation(fields: [instituicaoId], references: [id])
+
+  user   User[]
+  envios Transaction[] @relation("ProfessorEnvio")
+}
+
+model EmpresaParceira {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  cnpj      String   @unique
+  endereco  String
+  createdAt DateTime @default(now())
+
+  vantagens Vantagem[]
+  user      User[]
+}
+
+model Vantagem {
+  id                String           @id @default(uuid())
+  titulo            String
+  descricao         String
+  custoEmMoedas     Int
+  fotoUrl           String?
+  createdAt         DateTime         @default(now())
+
+  empresaParceiraId String
+  empresaParceira   EmpresaParceira  @relation(fields: [empresaParceiraId], references: [id])
+
+  resgates          Transaction[]    @relation("ResgateVantagem")
+}
+
+model Transaction {
+  id         String           @id @default(uuid())
+  type       TransactionType
+  amount     Int
+  message    String?
+  couponCode String?
+  createdAt  DateTime         @default(now())
+
+  professorId String?
+  professor   Professor?      @relation("ProfessorEnvio", fields: [professorId], references: [id])
+
+  alunoId     String?
+  aluno       Aluno?          @relation("AlunoRecebimento", fields: [alunoId], references: [id])
+
+  vantagemId  String?
+  vantagem    Vantagem?       @relation("ResgateVantagem", fields: [vantagemId], references: [id])
+
+  alunoResgateId String?
+  alunoResgate   Aluno?        @relation("AlunoResgate", fields: [alunoResgateId], references: [id])
+
+  @@index([type])
+}

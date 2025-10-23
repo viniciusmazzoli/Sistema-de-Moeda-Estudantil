@@ -1,0 +1,1 @@
+export const runtime='nodejs'; import { NextResponse } from 'next/server'; import { prisma } from '@/lib/prisma'; export async function GET(){ return NextResponse.json(await prisma.professor.findMany({ orderBy:{createdAt:'desc'} })); }
