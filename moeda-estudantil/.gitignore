@@ -1,0 +1,23 @@
+# Dependências e builds dentro de moeda-estudantil
+moeda-estudantil/node_modules/
+moeda-estudantil/.next/
+moeda-estudantil/out/
+moeda-estudantil/dist/
+moeda-estudantil/build/
+moeda-estudantil/turbo/
+moeda-estudantil/.next.cache/
+
+# Logs e temporários
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Ambientes e IDEs
+.env
+.env.local
+.env.*.local
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
