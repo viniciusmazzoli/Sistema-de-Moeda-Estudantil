@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ALUNO
+  PROFESSOR
+  PARCEIRO
+  ADMIN
+}
+
+enum TransactionType {
+  CREDITO_PROFESSOR
+  ENVIO_PROFESSOR_ALUNO
+  RESGATE_ALUNO
+  RESGATE_VANTAGEM
+}
+
+enum RedemptionStatus {
+  GERADO
+  UTILIZADO
+  EXPIRADO
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  role         Role
+  active       Boolean   @default(true)
+  name         String
+  email        String    @unique
+  passwordHash String?
+  cpf          String?
+  rg           String?
+  address      String?
+  institution  String?
+  course       String?
+  department   String?
+  cnpj         String?
+  contactName  String?
+  createdAt    DateTime  @default(now())
+
+  // relações
+  account      Account?
+  rewards      Reward[]      @relation("PartnerRewards")
+  redemptions  Redemption[]  @relation("StudentRedemptions")
+}
+
+model Account {
+  id        Int          @id @default(autoincrement())
+  user      User         @relation(fields: [userId], references: [id])
+  userId    Int          @unique
+  balance   Int          @default(0)
+
+  outgoingTransactions Transaction[] @relation("FromAccount")
+  incomingTransactions Transaction[] @relation("ToAccount")
+}
+
+model Transaction {
+  id            Int             @id @default(autoincrement())
+  type          TransactionType
+  fromAccountId Int?
+  toAccountId   Int?
+  fromAccount   Account?        @relation("FromAccount", fields: [fromAccountId], references: [id])
+  toAccount     Account?        @relation("ToAccount", fields: [toAccountId], references: [id])
+  amount        Int
+  description   String
+  couponCode    String?
+  createdAt     DateTime        @default(now())
+}
+
+model Reward {
+  id          Int          @id @default(autoincrement())
+  partnerId   Int
+  partner     User         @relation("PartnerRewards", fields: [partnerId], references: [id])
+  title       String
+  description String
+  cost        Int
+  imageUrl    String?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+
+  redemptions Redemption[]
+}
+
+model Redemption {
+  id        Int              @id @default(autoincrement())
+  rewardId  Int
+  studentId Int
+  code      String           @unique
+  status    RedemptionStatus @default(GERADO)
+  createdAt DateTime         @default(now())
+
+  reward   Reward @relation(fields: [rewardId], references: [id])
+  student  User   @relation("StudentRedemptions", fields: [studentId], references: [id])
+}
