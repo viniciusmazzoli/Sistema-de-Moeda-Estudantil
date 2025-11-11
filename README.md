@@ -60,21 +60,4 @@
 
 ---
 
-### Requisitos Não Funcionais (NFRs)
-- **Segurança:** Hash forte (Argon2/bcrypt), MFA opcional, mínimo de dados pessoais (LGPD).  
-- **Disponibilidade:** 99,5% mensal.  
-- **Escalabilidade:** Suportar picos de e-mail no início do semestre (job B1).  
-- **Performance:** Listagens < 1,5s (95º percentil, 10k transações).  
-- **Observabilidade:** Logs estruturados e métricas de jobs (sucesso/falha/reexecução).  
-- **Integridade:** Transações atômicas e idempotentes.  
-- **Usabilidade:** Acessibilidade AA, mensagens de erro claras.  
-
----
-
-### Definição de Pronto (DoD)
-- Critérios Gherkin atendidos e testados (unitários + integração).  
-- Logs e auditoria conforme NFR.  
-- Templates de e-mail revisados (jurídico/LGPD) e testados no provedor.  
-- Tratamento de erros e mensagens localizadas (pt-BR).  
-- Documentação de API e migrações de BD versionadas.
 
