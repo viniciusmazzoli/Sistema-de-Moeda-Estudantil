@@ -1,4 +1,3 @@
-// src/pages/PartnerDashboard.tsx
 import { FormEvent, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -15,10 +14,17 @@ interface Reward {
   createdAt: string;
 }
 
-export default function PartnerDashboard() {
-  const { user } = useAuth(); // HOOK 1
+type StatusFiltro = "TODOS" | "GERADO" | "UTILIZADO";
 
-  // TODOS os hooks aqui em cima
+export default function PartnerDashboard() {
+  const { user } = useAuth();
+
+  if (!user || user.role !== "parceiro") {
+    return <Navigate to="/" replace />;
+  }
+
+  const partnerBackendId = user.backendId;
+
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
@@ -27,8 +33,13 @@ export default function PartnerDashboard() {
   const [carregandoLista, setCarregandoLista] = useState(false);
   const [carregandoCriacao, setCarregandoCriacao] = useState(false);
 
-  const partnerBackendId = user?.backendId;
+  // NOVO: validação de cupom + lista de resgates
+  const [codigoCupom, setCodigoCupom] = useState("");
+  const [validando, setValidando] = useState(false);
+  const [redemptions, setRedemptions] = useState<any[]>([]);
+  const [filtroStatus, setFiltroStatus] = useState<StatusFiltro>("TODOS");
 
+  // Carrega vantagens do parceiro
   useEffect(() => {
     if (!partnerBackendId) return;
 
@@ -50,22 +61,27 @@ export default function PartnerDashboard() {
     carregarRewards();
   }, [partnerBackendId]);
 
-  // SÓ AGORA vêm os returns condicionais
+  // Carrega resgates do parceiro (com filtro por status)
+  useEffect(() => {
+    if (!partnerBackendId) return;
 
-  if (!user || user.role !== "parceiro") {
-    return <Navigate to="/" replace />;
-  }
+    const carregarResgates = async () => {
+      try {
+        const qs = new URLSearchParams();
+        qs.set("partnerId", String(partnerBackendId));
+        if (filtroStatus !== "TODOS") qs.set("status", filtroStatus);
+        const resp = await fetch(
+          `http://localhost:3333/rewards/partner/redemptions?${qs.toString()}`
+        );
+        const data = await resp.json();
+        setRedemptions(data);
+      } catch (err) {
+        console.error("Erro ao carregar resgates:", err);
+      }
+    };
 
-  if (!partnerBackendId) {
-    return (
-      <Layout title="Área da Empresa Parceira">
-        <p>
-          Este usuário parceiro não está vinculado corretamente ao backend
-          (sem <code>backendId</code>).
-        </p>
-      </Layout>
-    );
-  }
+    carregarResgates();
+  }, [partnerBackendId, filtroStatus]);
 
   const handleCriarVantagem = async (e: FormEvent) => {
     e.preventDefault();
@@ -74,7 +90,6 @@ export default function PartnerDashboard() {
       alert("Preencha título e descrição.");
       return;
     }
-
     if (custo <= 0) {
       alert("O custo deve ser maior que zero.");
       return;
@@ -85,9 +100,7 @@ export default function PartnerDashboard() {
 
       const resp = await fetch("http://localhost:3333/rewards", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           partnerId: partnerBackendId,
           title: titulo,
@@ -105,8 +118,10 @@ export default function PartnerDashboard() {
         return;
       }
 
+      // adiciona a nova vantagem no topo da lista
       setRewards((prev) => [data, ...prev]);
 
+      // limpa formulário
       setTitulo("");
       setDescricao("");
       setCusto(10);
@@ -118,6 +133,51 @@ export default function PartnerDashboard() {
       alert("Erro inesperado ao criar vantagem.");
     } finally {
       setCarregandoCriacao(false);
+    }
+  };
+
+  const handleValidarCupom = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const code = codigoCupom.trim().toUpperCase();
+    if (!code) {
+      alert("Informe o código do cupom.");
+      return;
+    }
+
+    try {
+      setValidando(true);
+      const resp = await fetch("http://localhost:3333/rewards/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          partnerId: partnerBackendId,
+          code,
+        }),
+      });
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        alert(data.error || "Erro ao validar cupom.");
+        return;
+      }
+
+      alert("Cupom validado com sucesso!");
+      setCodigoCupom("");
+
+      // refresh da lista de resgates
+      const qs = new URLSearchParams();
+      qs.set("partnerId", String(partnerBackendId));
+      if (filtroStatus !== "TODOS") qs.set("status", filtroStatus);
+      const refresh = await fetch(
+        `http://localhost:3333/rewards/partner/redemptions?${qs.toString()}`
+      );
+      setRedemptions(await refresh.json());
+    } catch (err) {
+      console.error("Erro ao validar cupom:", err);
+      alert("Erro inesperado ao validar cupom.");
+    } finally {
+      setValidando(false);
     }
   };
 
@@ -178,7 +238,7 @@ export default function PartnerDashboard() {
           </form>
         </Card>
 
-        <Card title="Resumo das suas vantagens">
+        <Card title="Suas vantagens">
           {carregandoLista ? (
             <p className="texto-suave">Carregando vantagens...</p>
           ) : rewards.length === 0 ? (
@@ -195,9 +255,7 @@ export default function PartnerDashboard() {
                     <p className="texto-suave" style={{ marginTop: 4 }}>
                       {r.description}
                     </p>
-                    <p className="vantagem-custo">
-                      Custo: {r.cost} moedas
-                    </p>
+                    <p className="vantagem-custo">Custo: {r.cost} moedas</p>
                     <p className="texto-suave">
                       Criada em{" "}
                       {new Date(r.createdAt).toLocaleDateString("pt-BR")}
@@ -209,6 +267,87 @@ export default function PartnerDashboard() {
           )}
         </Card>
       </div>
+
+      {/* NOVO: Validar Cupom */}
+      <Card title="Validar cupom de resgate">
+        <form className="form-grid" onSubmit={handleValidarCupom}>
+          <label className="full-row">
+            Código do cupom
+            <input
+              type="text"
+              value={codigoCupom}
+              onChange={(e) => setCodigoCupom(e.target.value)}
+              placeholder="Ex: 8F2K1QZL"
+            />
+          </label>
+          <div className="full-row">
+            <button type="submit" className="primary-button" disabled={validando}>
+              {validando ? "Validando..." : "Validar e marcar como utilizado"}
+            </button>
+          </div>
+          <p className="texto-suave">
+            Dica: o código chega por e-mail para o aluno e para o parceiro no momento do resgate.
+          </p>
+        </form>
+      </Card>
+
+      {/* NOVO: Lista de Resgates */}
+      <Card title="Resgates do seu estabelecimento">
+        <div style={{ marginBottom: 12 }}>
+          <label className="texto-suave" style={{ fontSize: 13 }}>
+            Filtrar por status:
+            <select
+              value={filtroStatus}
+              onChange={(e) => setFiltroStatus(e.target.value as StatusFiltro)}
+              style={{ marginLeft: 8 }}
+            >
+              <option value="TODOS">Todos</option>
+              <option value="GERADO">Gerado</option>
+              <option value="UTILIZADO">Utilizado</option>
+            </select>
+          </label>
+        </div>
+
+        {redemptions.length === 0 ? (
+          <p className="texto-suave">Nenhum resgate para os filtros atuais.</p>
+        ) : (
+          <table className="tabela">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Aluno</th>
+                <th>Vantagem</th>
+                <th>Código</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {redemptions.map((r) => (
+                <tr key={r.id}>
+                  <td>{new Date(r.createdAt).toLocaleString("pt-BR")}</td>
+                  <td>{r.student?.name || "-"}</td>
+                  <td>{r.reward?.title || "-"}</td>
+                  <td>
+                    <code>{r.code}</code>
+                  </td>
+                  <td>
+                    <span className="status-pill" style={{ background: "#f3f4f6" }}>
+                      <span
+                        className="status-dot"
+                        style={{
+                          backgroundColor:
+                            r.status === "UTILIZADO" ? "#16a34a" : "#f59e0b",
+                        }}
+                      />
+                      {r.status === "UTILIZADO" ? "Utilizado" : "Gerado"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
     </Layout>
   );
 }
