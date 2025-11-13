@@ -52,7 +52,9 @@ export default function PartnerDashboard() {
   const [editImagemArquivo, setEditImagemArquivo] = useState<File | null>(null);
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
-  // Carrega vantagens do parceiro
+  // -------------------------
+  // CARREGAR VANTAGENS DO PARCEIRO (ATIVAS + INATIVAS)
+  // -------------------------
   useEffect(() => {
     if (!partnerBackendId) return;
 
@@ -60,7 +62,7 @@ export default function PartnerDashboard() {
       try {
         setCarregandoLista(true);
         const resp = await fetch(
-          `http://localhost:3333/rewards?partnerId=${partnerBackendId}`
+          `http://localhost:3333/rewards?partnerId=${partnerBackendId}&includeInactive=true`
         );
         const data = await resp.json();
         setRewards(data);
@@ -74,7 +76,9 @@ export default function PartnerDashboard() {
     carregarRewards();
   }, [partnerBackendId]);
 
-  // Carrega resgates do parceiro (com filtro por status)
+  // -------------------------
+  // CARREGAR RESGATES DO PARCEIRO
+  // -------------------------
   useEffect(() => {
     if (!partnerBackendId) return;
 
