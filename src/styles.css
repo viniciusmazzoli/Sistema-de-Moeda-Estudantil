@@ -27,7 +27,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 12px 24px;
-  background: #1f2933;
+  background: #4c7aa8;
   color: #fff;
 }
 
@@ -691,4 +691,28 @@ textarea:focus {
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
+}
+
+
+
+.logo {
+  display: block; 
+  
+  /* Tente este valor. É bem maior que 125px */
+  width: 100%; 
+  height: auto; /* 'auto' mantém a proporção (não estica/distorce) */
+
+  /* Mantém o espaçamento que arrumamos */
+  margin: 2.5rem auto 2rem auto; 
+  margin-top: -50px;
+  margin-bottom: -50px;
+
+}
+
+
+.logo-homepage {
+  width: 160px;
+  height: auto;
+  margin-top: -50px;
+  margin-bottom: -50px;
 }

@@ -124,7 +124,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
-            E-mail
+            E-mail 
             <input
               type="email"
               value={email}
@@ -134,7 +134,7 @@ export default function LoginPage() {
           </label>
 
           <label>
-            Senha
+            Senha 
             <input
               type="password"
               value={senha}

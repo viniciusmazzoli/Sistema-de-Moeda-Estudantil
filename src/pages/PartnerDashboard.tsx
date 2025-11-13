@@ -32,7 +32,7 @@ export default function PartnerDashboard() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [custo, setCusto] = useState<number>(10);
+  const [custo, setCusto] = useState<number | string>("");  
   const [imagemArquivo, setImagemArquivo] = useState<File | null>(null);
   const [carregandoLista, setCarregandoLista] = useState(false);
   const [carregandoCriacao, setCarregandoCriacao] = useState(false);
@@ -360,15 +360,23 @@ export default function PartnerDashboard() {
               />
             </label>
 
-            <label>
-              Custo em moedas
-              <input
-                type="number"
-                min={1}
-                value={custo}
-                onChange={(e) => setCusto(Number(e.target.value))}
-              />
-            </label>
+           <label>
+            Custo em moedas *
+            <input
+              type="number"
+              min={1}
+              value={custo}
+              onChange={(e) => {
+                const value = e.target.value;
+                setCusto(value === "" ? "" : Number(value));
+              }}
+              onBlur={() => {
+                if (custo === "" || custo === null) setCusto(0);
+              }}
+            />
+          </label>
+
+
 
             <label>
               Imagem da vantagem (opcional)

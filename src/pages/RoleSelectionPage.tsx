@@ -13,7 +13,7 @@ export default function RoleSelectionPage() {
   return (
     <div className="center-page">
       <div className="role-container">
-        <h1>Sistema de Mérito Estudantil</h1>
+        <img src="/LogoAcademi.png" alt="Logo da Academia" className="logo" />
         <p>Selecione como deseja acessar:</p>
 
         <div className="role-grid">

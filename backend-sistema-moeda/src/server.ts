@@ -11,6 +11,7 @@ import transactionRoutes from "./routes/transactionRoutes";
 import accountRoutes from "./routes/accountRoutes";
 import rewardRoutes from "./routes/rewardRoutes";
 import authRoutes from "./routes/authRoutes";
+import notificationRoutes from "./routes/notificationRoutes"; // 👈 NOVO
 
 dotenv.config();
 
@@ -177,6 +178,11 @@ app.use("/accounts", accountRoutes);
 //        RECOMPENSAS
 // ----------------------------
 app.use("/rewards", rewardRoutes);
+
+// ----------------------------
+//        NOTIFICAÇÕES
+// ----------------------------
+app.use("/notifications", notificationRoutes);
 
 // ----------------------------
 //        START SERVER

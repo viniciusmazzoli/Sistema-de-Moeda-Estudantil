@@ -148,7 +148,7 @@ export default function RegisterPage() {
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label>
-            Nome
+            Nome *
             <input
               type="text"
               value={nome}
@@ -158,7 +158,7 @@ export default function RegisterPage() {
           </label>
 
           <label>
-            E-mail
+            E-mail *
             <input
               type="email"
               value={email}
@@ -168,7 +168,7 @@ export default function RegisterPage() {
           </label>
 
           <label>
-            Senha
+            Senha *
             <input
               type="password"
               value={senha}
@@ -178,7 +178,7 @@ export default function RegisterPage() {
           </label>
 
           <label>
-            Confirmar senha
+            Confirmar senha *
             <input
               type="password"
               value={confirmarSenha}
@@ -190,47 +190,52 @@ export default function RegisterPage() {
           {role === "aluno" && (
             <>
               <label>
-                CPF
+                CPF *
                 <input
                   type="text"
                   value={cpf}
                   onChange={(e) => setCpf(e.target.value)}
+                  required 
                 />
               </label>
 
               <label>
-                RG
+                RG *
                 <input
                   type="text"
                   value={rg}
                   onChange={(e) => setRg(e.target.value)}
+                  required 
                 />
               </label>
 
               <label>
-                Endereço
+                Endereço *
                 <input
                   type="text"
                   value={endereco}
                   onChange={(e) => setEndereco(e.target.value)}
+                  required 
                 />
               </label>
 
               <label>
-                Instituição de Ensino
+                Instituição de Ensino *
                 <input
                   type="text"
                   value={instituicao}
                   onChange={(e) => setInstituicao(e.target.value)}
+                  required 
                 />
               </label>
 
               <label>
-                Curso
+                Curso *
                 <input
                   type="text"
                   value={curso}
                   onChange={(e) => setCurso(e.target.value)}
+                  required 
                 />
               </label>
             </>
@@ -239,29 +244,32 @@ export default function RegisterPage() {
           {role === "professor" && (
             <>
               <label>
-                CPF
+                CPF *
                 <input
                   type="text"
                   value={cpf}
                   onChange={(e) => setCpf(e.target.value)}
+                  required 
                 />
               </label>
 
               <label>
-                Instituição
+                Instituição *
                 <input
                   type="text"
                   value={instituicao}
                   onChange={(e) => setInstituicao(e.target.value)}
+                  required 
                 />
               </label>
 
               <label>
-                Departamento
+                Departamento *
                 <input
                   type="text"
                   value={departamento}
                   onChange={(e) => setDepartamento(e.target.value)}
+                  required 
                 />
               </label>
             </>
@@ -270,29 +278,32 @@ export default function RegisterPage() {
           {role === "parceiro" && (
             <>
               <label>
-                CNPJ
+                CNPJ *
                 <input
                   type="text"
                   value={cnpj}
                   onChange={(e) => setCnpj(e.target.value)}
+                  required 
                 />
               </label>
 
               <label>
-                Nome do responsável / contato
+                Nome do responsável / contato *
                 <input
                   type="text"
                   value={contato}
                   onChange={(e) => setContato(e.target.value)}
+                  required 
                 />
               </label>
 
               <label>
-                Endereço
+                Endereço *
                 <input
                   type="text"
                   value={endereco}
                   onChange={(e) => setEndereco(e.target.value)}
+                  required 
                 />
               </label>
             </>

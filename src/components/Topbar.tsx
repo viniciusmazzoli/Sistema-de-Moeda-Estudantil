@@ -20,7 +20,7 @@ export default function Topbar() {
 
   return (
     <header className="topbar">
-      <div className="topbar-logo">🎓 Sistema de Mérito Estudantil</div>
+        <img src="/LogoAcademi.png" alt="Logo" className="logo-homepage" />
 
       <nav className="topbar-nav">
         <Link to="/">Início</Link>
