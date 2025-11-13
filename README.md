@@ -12,6 +12,7 @@ O sistema permite:
 - Cadastro de **alunos**, **professores** e **empresas parceiras**
 - Envio de moedas por professores
 - Notificações automáticas por e-mail
+- Visualização de notificações na homepage para usuários notificados
 - Consulta de extrato de transações
 - Cadastro de vantagens pelas empresas
 - Troca de moedas por produtos ou descontos
