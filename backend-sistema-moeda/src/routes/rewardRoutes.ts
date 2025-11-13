@@ -1,17 +1,27 @@
+// src/routes/rewardRoutes.ts
 import { Router } from "express";
 import { prisma } from "../prisma";
-import { sendRewardRedemptionEmails } from "../services/mailService";
+import {
+  sendRewardRedemptionEmails,
+  sendRewardUsedEmails,
+} from "../services/mailService";
+import { upload } from "../middleware/upload";
 
 const router = Router();
 
 /**
  * POST /rewards
  * Criação de vantagem pelo parceiro
- * Body: { partnerId: number, title: string, description: string, cost: number, imageUrl?: string }
+ * Body (multipart/form-data):
+ *  - partnerId
+ *  - title
+ *  - description
+ *  - cost
+ *  - image (file opcional)
  */
-router.post("/", async (req, res) => {
+router.post("/", upload.single("image"), async (req, res) => {
   try {
-    const { partnerId, title, description, cost, imageUrl } = req.body;
+    const { partnerId, title, description, cost } = req.body;
 
     if (!partnerId || !title || !description || !cost) {
       return res.status(400).json({
@@ -27,13 +37,15 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Parceiro inválido." });
     }
 
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
     const reward = await prisma.reward.create({
       data: {
         partnerId: partner.id,
         title,
         description,
         cost: Number(cost),
-        imageUrl: imageUrl || null,
+        imageUrl,
       },
     });
 
@@ -175,17 +187,19 @@ router.post("/redeem", async (req, res) => {
   }
 });
 
-/**
- * NOVO: POST /rewards/validate
- * Validação de cupom pelo parceiro (marca como UTILIZADO)
- * Body: { partnerId: number, code: string }
- */
+// ------------------------
+// Validação de cupom pelo parceiro
+// POST /rewards/validate
+// Body: { partnerId: number, code: string }
+// ------------------------
 router.post("/validate", async (req, res) => {
   try {
     const { partnerId, code } = req.body;
 
     if (!partnerId || !code) {
-      return res.status(400).json({ error: "Campos obrigatórios: partnerId e code." });
+      return res
+        .status(400)
+        .json({ error: "Campos obrigatórios: partnerId e code." });
     }
 
     const redemption = await prisma.redemption.findUnique({
@@ -201,7 +215,9 @@ router.post("/validate", async (req, res) => {
     }
 
     if (redemption.reward.partnerId !== Number(partnerId)) {
-      return res.status(403).json({ error: "Cupom não pertence a este parceiro." });
+      return res
+        .status(403)
+        .json({ error: "Cupom não pertence a este parceiro." });
     }
 
     if (redemption.status === "UTILIZADO") {
@@ -220,7 +236,29 @@ router.post("/validate", async (req, res) => {
       },
     });
 
-    // (Opcional) disparar e-mail de confirmação de uso
+    // envia e-mails de confirmação de uso
+    try {
+      const alunoNome = updated.student?.name || "Aluno";
+      const alunoEmail = updated.student?.email || "";
+      const partnerNome = updated.reward?.partner?.name || "Parceiro";
+      const partnerEmail = updated.reward?.partner?.email || "";
+      const rewardTitle = updated.reward?.title || "Vantagem";
+      const couponCode = updated.code;
+
+      if (alunoEmail && partnerEmail) {
+        await sendRewardUsedEmails({
+          alunoNome,
+          alunoEmail,
+          partnerNome,
+          partnerEmail,
+          rewardTitle,
+          couponCode,
+          usedAt: new Date(),
+        });
+      }
+    } catch (mailErr) {
+      console.error("Erro ao enviar e-mails de confirmação de uso:", mailErr);
+    }
 
     return res.json({
       message: "Cupom validado e marcado como UTILIZADO.",
@@ -233,7 +271,7 @@ router.post("/validate", async (req, res) => {
 });
 
 /**
- * NOVO: GET /rewards/partner/redemptions?partnerId=10&status=GERADO|UTILIZADO (status opcional)
+ * GET /rewards/partner/redemptions?partnerId=10&status=GERADO|UTILIZADO (status opcional)
  * Lista resgates do parceiro
  */
 router.get("/partner/redemptions", async (req, res) => {
@@ -260,6 +298,96 @@ router.get("/partner/redemptions", async (req, res) => {
   } catch (error) {
     console.error("Erro em GET /rewards/partner/redemptions:", error);
     return res.status(500).json({ error: "Erro ao listar resgates." });
+  }
+});
+
+/**
+ * PUT /rewards/:id
+ * Atualiza título, descrição, custo e, opcionalmente, a imagem
+ * Body (multipart/form-data):
+ *  - title
+ *  - description
+ *  - cost
+ *  - image (file opcional)
+ */
+router.put("/:id", upload.single("image"), async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { title, description, cost } = req.body;
+
+    const existing = await prisma.reward.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ error: "Vantagem não encontrada." });
+    }
+
+    const dataToUpdate: any = {};
+
+    if (title !== undefined) dataToUpdate.title = title;
+    if (description !== undefined) dataToUpdate.description = description;
+    if (cost !== undefined) dataToUpdate.cost = Number(cost);
+
+    // se veio um novo arquivo, troca a imagem; se não, mantém a antiga
+    if (req.file) {
+      dataToUpdate.imageUrl = `/uploads/${req.file.filename}`;
+    } else {
+      dataToUpdate.imageUrl = existing.imageUrl;
+    }
+
+    const updated = await prisma.reward.update({
+      where: { id },
+      data: dataToUpdate,
+    });
+
+    return res.json(updated);
+  } catch (error) {
+    console.error("Erro em PUT /rewards/:id:", error);
+    return res.status(500).json({ error: "Erro ao atualizar vantagem." });
+  }
+});
+
+/**
+ * PATCH /rewards/:id/status
+ * Ativa / inativa vantagem
+ * Body: { active: boolean }
+ */
+router.patch("/:id/status", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { active } = req.body;
+
+    if (active === undefined) {
+      return res.status(400).json({ error: "Campo 'active' é obrigatório." });
+    }
+
+    const updated = await prisma.reward.update({
+      where: { id },
+      data: { active: Boolean(active) },
+    });
+
+    return res.json(updated);
+  } catch (error) {
+    console.error("Erro em PATCH /rewards/:id/status:", error);
+    return res.status(500).json({ error: "Erro ao alterar status." });
+  }
+});
+
+/**
+ * DELETE /rewards/:id
+ * Exclui vantagem e seus resgates
+ */
+router.delete("/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    await prisma.$transaction([
+      prisma.redemption.deleteMany({ where: { rewardId: id } }),
+      prisma.reward.delete({ where: { id } }),
+    ]);
+
+    return res.json({ message: "Vantagem excluída com sucesso." });
+  } catch (error) {
+    console.error("Erro em DELETE /rewards/:id:", error);
+    return res.status(500).json({ error: "Erro ao excluir vantagem." });
   }
 });
 

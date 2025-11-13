@@ -211,6 +211,17 @@ export default function StudentDashboard() {
             <div className="vantagens-grid">
               {rewards.map((r) => (
                 <div key={r.id} className="vantagem-card">
+                  {/* 👇 IMAGEM DA VANTAGEM, SE EXISTIR */}
+                  {r.imageUrl && (
+                    <div className="vantagem-imagem-wrapper">
+                      <img
+                        src={`http://localhost:3333${r.imageUrl}`}
+                        alt={r.title}
+                        className="vantagem-imagem"
+                      />
+                    </div>
+                  )}
+
                   <strong>{r.title}</strong>
                   <p className="texto-suave" style={{ marginTop: 4 }}>
                     {r.description}

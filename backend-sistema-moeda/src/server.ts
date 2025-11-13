@@ -2,29 +2,35 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+
 import { prisma } from "./prisma";
+
+// ROTAS
 import transactionRoutes from "./routes/transactionRoutes";
 import accountRoutes from "./routes/accountRoutes";
 import rewardRoutes from "./routes/rewardRoutes";
 import authRoutes from "./routes/authRoutes";
 
-
-
 dotenv.config();
 
 const app = express();
 
+// MIDDLEWARES
 app.use(cors());
 app.use(express.json());
 
-// Rota de teste
+// Servir imagens enviadas pelos parceiros
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+
+// ROTA DE STATUS DA API
 app.get("/", (req, res) => {
   res.json({ message: "API Sistema de Mérito Estudantil OK" });
 });
 
-// ---------- USERS ----------
-
-// Cadastro de aluno / professor / parceiro / admin
+// ----------------------------
+//        USERS CRUD
+// ----------------------------
 app.post("/users", async (req, res) => {
   try {
     const {
@@ -66,9 +72,7 @@ app.post("/users", async (req, res) => {
           },
         },
       },
-      include: {
-        account: true,
-      },
+      include: { account: true },
     });
 
     return res.status(201).json(user);
@@ -78,20 +82,18 @@ app.post("/users", async (req, res) => {
   }
 });
 
-// Lista todos os usuários
 app.get("/users", async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       include: { account: true },
     });
-    res.json(users);
+    return res.json(users);
   } catch (error) {
     console.error("Erro em GET /users:", error);
-    res.status(500).json({ error: "Erro ao listar usuários" });
+    return res.status(500).json({ error: "Erro ao listar usuários" });
   }
 });
 
-// atualizar usuário (nome, email, role, active)
 app.put("/users/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -115,7 +117,6 @@ app.put("/users/:id", async (req, res) => {
   }
 });
 
-// desativar / reativar usuário (toggle de active)
 app.patch("/users/:id/status", async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -139,19 +140,14 @@ app.patch("/users/:id/status", async (req, res) => {
   }
 });
 
-// excluir usuário (e dados ligados)
 app.delete("/users/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
 
     await prisma.$transaction([
-      // apaga contas ligadas
       prisma.account.deleteMany({ where: { userId: id } }),
-      // apaga vantagens do parceiro (se for PARCEIRO)
       prisma.reward.deleteMany({ where: { partnerId: id } }),
-      // apaga resgates do aluno (se for ALUNO)
       prisma.redemption.deleteMany({ where: { studentId: id } }),
-      // por último apaga o usuário
       prisma.user.delete({ where: { id } }),
     ]);
 
@@ -162,64 +158,29 @@ app.delete("/users/:id", async (req, res) => {
   }
 });
 
-
-// ---------- AUTH (LOGIN) ----------
-
-/* app.post("/auth/login", async (req, res) => {
-  try {
-    const { role, email } = req.body;
-
-    if (!role || !email) {
-      return res
-        .status(400)
-        .json({ error: "Campos obrigatórios: role e email" });
-    }
-
-    // procura usuário com esse role e email
-    const user = await prisma.user.findFirst({
-      where: {
-        role,   // "ALUNO" | "PROFESSOR" | ...
-        email,
-      },
-      include: {
-        account: true,
-      },
-    });
-
-    if (!user) {
-      return res
-        .status(401)
-        .json({ error: "Usuário não encontrado. Verifique os dados ou faça cadastro." });
-    }
-
-    // aqui seria onde num sistema real você validaria senha, etc.
-    return res.json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      account: user.account,
-    });
-  } catch (error) {
-    console.error("Erro em POST /auth/login:", error);
-    return res.status(500).json({ error: "Erro ao fazer login" });
-  }
-}); */
-
-// ---------- TRANSAÇÕES ----------
-app.use("/transactions", transactionRoutes);
-
-// ---------- CONTAS / EXTRATO ----------
-app.use("/accounts", accountRoutes);
-
-// ---------- VANTAGENS / REWARDS ----------
-app.use("/rewards", rewardRoutes);
-
-// ---------- MIDDLEWARES ----------
+// ----------------------------
+//        AUTH / LOGIN JWT
+// ----------------------------
 app.use("/auth", authRoutes);
 
+// ----------------------------
+//        TRANSAÇÕES
+// ----------------------------
+app.use("/transactions", transactionRoutes);
 
-// ---------- START ----------
+// ----------------------------
+//        CONTAS
+// ----------------------------
+app.use("/accounts", accountRoutes);
+
+// ----------------------------
+//        RECOMPENSAS
+// ----------------------------
+app.use("/rewards", rewardRoutes);
+
+// ----------------------------
+//        START SERVER
+// ----------------------------
 const PORT = 3333;
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
