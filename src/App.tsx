@@ -7,6 +7,9 @@ import ProfessorDashboard from "./pages/ProfessorDashboard";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import RegisterPage from "./pages/RegisterPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+
 
 function App() {
   return (
@@ -28,6 +31,10 @@ function App() {
 
       {/* Rota coringa */}
       <Route path="*" element={<RoleSelectionPage />} />
+
+      {/* Recuperação de senha */}
+      <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+      <Route path="/reset-senha/:token" element={<ResetPasswordPage />} />
     </Routes>
   );
 }

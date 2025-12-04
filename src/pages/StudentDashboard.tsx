@@ -4,6 +4,7 @@ import { Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Card from "../components/Card";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 interface Reward {
   id: number;
@@ -25,16 +26,15 @@ interface ExtratoItem {
 }
 
 export default function StudentDashboard() {
-  const { user } = useAuth(); // HOOK 1
+  const { user } = useAuth();
+  const { showToast } = useToast();
 
-  // HOOKS sempre aqui em cima
   const [saldo, setSaldo] = useState<number | null>(null);
   const [extrato, setExtrato] = useState<ExtratoItem[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [carregandoDados, setCarregandoDados] = useState(true);
-  const [carregandoResgateId, setCarregandoResgateId] = useState<number | null>(
-    null
-  );
+  const [carregandoResgateId, setCarregandoResgateId] =
+    useState<number | null>(null);
 
   const alunoBackendId = user?.backendId;
 
@@ -83,8 +83,7 @@ export default function StudentDashboard() {
 
         // Ordena por data desc
         itens.sort(
-          (a, b) =>
-            new Date(b.data).getTime() - new Date(a.data).getTime()
+          (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
         );
         setExtrato(itens);
 
@@ -94,13 +93,14 @@ export default function StudentDashboard() {
         setRewards(listaRewards);
       } catch (err) {
         console.error("Erro ao carregar dados do aluno:", err);
+        showToast("Erro ao carregar dados do aluno.", "error");
       } finally {
         setCarregandoDados(false);
       }
     };
 
     carregar();
-  }, [alunoBackendId]);
+  }, [alunoBackendId, showToast]);
 
   // Proteção de rota
   if (!user || user.role !== "aluno") {
@@ -123,7 +123,7 @@ export default function StudentDashboard() {
 
   const handleResgatar = async (reward: Reward) => {
     if (!podeResgatar(reward)) {
-      alert("Saldo insuficiente para resgatar esta vantagem.");
+      showToast("Saldo insuficiente para resgatar esta vantagem.", "error");
       return;
     }
 
@@ -145,7 +145,7 @@ export default function StudentDashboard() {
 
       if (!resp.ok) {
         console.error(data);
-        alert(data.error || "Erro ao resgatar vantagem.");
+        showToast(data.error || "Erro ao resgatar vantagem.", "error");
         return;
       }
 
@@ -171,17 +171,18 @@ export default function StudentDashboard() {
         ]);
       }
 
-      // Mostra código de cupom retornado
+      // Notificação de sucesso
       if (data.couponCode) {
-        alert(
-          `Vantagem resgatada com sucesso!\n\nCódigo do cupom: ${data.couponCode}`
+        showToast(
+          `Vantagem resgatada com sucesso! Código do cupom: ${data.couponCode}`,
+          "success"
         );
       } else {
-        alert("Vantagem resgatada com sucesso!");
+        showToast("Vantagem resgatada com sucesso!", "success");
       }
     } catch (err) {
       console.error("Erro ao resgatar vantagem:", err);
-      alert("Erro inesperado ao resgatar vantagem.");
+      showToast("Erro inesperado ao resgatar vantagem.", "error");
     } finally {
       setCarregandoResgateId(null);
     }
@@ -211,7 +212,6 @@ export default function StudentDashboard() {
             <div className="vantagens-grid">
               {rewards.map((r) => (
                 <div key={r.id} className="vantagem-card">
-                  {/* 👇 IMAGEM DA VANTAGEM, SE EXISTIR */}
                   {r.imageUrl && (
                     <div className="vantagem-imagem-wrapper">
                       <img
@@ -226,9 +226,7 @@ export default function StudentDashboard() {
                   <p className="texto-suave" style={{ marginTop: 4 }}>
                     {r.description}
                   </p>
-                  <p className="vantagem-custo">
-                    Custo: {r.cost} moedas
-                  </p>
+                  <p className="vantagem-custo">Custo: {r.cost} moedas</p>
 
                   <button
                     className="primary-button"

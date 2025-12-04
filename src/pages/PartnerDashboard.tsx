@@ -5,6 +5,7 @@ import Layout from "../components/Layout";
 import Card from "../components/Card";
 import { useAuth } from "../context/AuthContext";
 import Modal from "../components/Modal";
+import { useToast } from "../context/ToastContext"; // ⬅️ NOVO
 
 interface Reward {
   id: number;
@@ -20,6 +21,7 @@ type StatusFiltro = "TODOS" | "GERADO" | "UTILIZADO";
 
 export default function PartnerDashboard() {
   const { user } = useAuth();
+  const { showToast } = useToast(); // ⬅️ NOVO
 
   // Proteção de rota
   if (!user || user.role !== "parceiro") {
@@ -32,7 +34,7 @@ export default function PartnerDashboard() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [custo, setCusto] = useState<number | string>("");  
+  const [custo, setCusto] = useState<number | string>("");
   const [imagemArquivo, setImagemArquivo] = useState<File | null>(null);
   const [carregandoLista, setCarregandoLista] = useState(false);
   const [carregandoCriacao, setCarregandoCriacao] = useState(false);
@@ -68,13 +70,14 @@ export default function PartnerDashboard() {
         setRewards(data);
       } catch (err) {
         console.error("Erro ao carregar vantagens:", err);
+        showToast("Erro ao carregar vantagens.", "error");
       } finally {
         setCarregandoLista(false);
       }
     };
 
     carregarRewards();
-  }, [partnerBackendId]);
+  }, [partnerBackendId, showToast]);
 
   // -------------------------
   // CARREGAR RESGATES DO PARCEIRO
@@ -95,11 +98,12 @@ export default function PartnerDashboard() {
         setRedemptions(data);
       } catch (err) {
         console.error("Erro ao carregar resgates:", err);
+        showToast("Erro ao carregar resgates.", "error");
       }
     };
 
     carregarResgates();
-  }, [partnerBackendId, filtroStatus]);
+  }, [partnerBackendId, filtroStatus, showToast]);
 
   // -------------------------
   // CADASTRAR VANTAGEM
@@ -108,11 +112,11 @@ export default function PartnerDashboard() {
     e.preventDefault();
 
     if (!titulo.trim() || !descricao.trim()) {
-      alert("Preencha título e descrição.");
+      showToast("Preencha título e descrição.", "error");
       return;
     }
-    if (custo <= 0) {
-      alert("O custo deve ser maior que zero.");
+    if (custo === "" || Number(custo) <= 0) {
+      showToast("O custo deve ser maior que zero.", "error");
       return;
     }
 
@@ -137,7 +141,7 @@ export default function PartnerDashboard() {
 
       if (!resp.ok) {
         console.error(data);
-        alert(data.error || "Erro ao cadastrar vantagem.");
+        showToast(data.error || "Erro ao cadastrar vantagem.", "error");
         return;
       }
 
@@ -148,10 +152,10 @@ export default function PartnerDashboard() {
       setCusto(10);
       setImagemArquivo(null);
 
-      alert("Vantagem cadastrada com sucesso!");
+      showToast("Vantagem cadastrada com sucesso!", "success");
     } catch (err) {
       console.error("Erro ao criar vantagem:", err);
-      alert("Erro inesperado ao criar vantagem.");
+      showToast("Erro inesperado ao criar vantagem.", "error");
     } finally {
       setCarregandoCriacao(false);
     }
@@ -165,7 +169,7 @@ export default function PartnerDashboard() {
 
     const code = codigoCupom.trim().toUpperCase();
     if (!code) {
-      alert("Informe o código do cupom.");
+      showToast("Informe o código do cupom.", "error");
       return;
     }
 
@@ -182,11 +186,11 @@ export default function PartnerDashboard() {
       const data = await resp.json();
 
       if (!resp.ok) {
-        alert(data.error || "Erro ao validar cupom.");
+        showToast(data.error || "Erro ao validar cupom.", "error");
         return;
       }
 
-      alert("Cupom validado com sucesso!");
+      showToast("Cupom validado com sucesso!", "success");
       setCodigoCupom("");
 
       const qs = new URLSearchParams();
@@ -198,7 +202,7 @@ export default function PartnerDashboard() {
       setRedemptions(await refresh.json());
     } catch (err) {
       console.error("Erro ao validar cupom:", err);
-      alert("Erro inesperado ao validar cupom.");
+      showToast("Erro inesperado ao validar cupom.", "error");
     } finally {
       setValidando(false);
     }
@@ -217,14 +221,15 @@ export default function PartnerDashboard() {
 
       if (!resp.ok) {
         const data = await resp.json();
-        alert(data.error || "Erro ao excluir vantagem.");
+        showToast(data.error || "Erro ao excluir vantagem.", "error");
         return;
       }
 
       setRewards((prev) => prev.filter((r) => r.id !== id));
+      showToast("Vantagem excluída com sucesso!", "success");
     } catch (err) {
       console.error("Erro ao excluir vantagem:", err);
-      alert("Erro inesperado ao excluir vantagem.");
+      showToast("Erro inesperado ao excluir vantagem.", "error");
     }
   };
 
@@ -244,18 +249,24 @@ export default function PartnerDashboard() {
         }
       );
 
+      const data = await resp.json();
+
       if (!resp.ok) {
-        const data = await resp.json();
-        alert(data.error || "Erro ao alterar status da vantagem.");
+        showToast(data.error || "Erro ao alterar status da vantagem.", "error");
         return;
       }
 
       setRewards((prev) =>
         prev.map((r) => (r.id === reward.id ? { ...r, active: novo } : r))
       );
+
+      showToast(
+        `Vantagem ${novo ? "ativada" : "inativada"} com sucesso!`,
+        "success"
+      );
     } catch (err) {
       console.error("Erro ao atualizar status da vantagem:", err);
-      alert("Erro inesperado ao atualizar status.");
+      showToast("Erro inesperado ao atualizar status.", "error");
     }
   };
 
@@ -278,11 +289,11 @@ export default function PartnerDashboard() {
     if (!editingReward) return;
 
     if (!editTitulo.trim() || !editDescricao.trim()) {
-      alert("Preencha título e descrição.");
+      showToast("Preencha título e descrição.", "error");
       return;
     }
     if (editCusto <= 0) {
-      alert("O custo deve ser maior que zero.");
+      showToast("O custo deve ser maior que zero.", "error");
       return;
     }
 
@@ -308,7 +319,7 @@ export default function PartnerDashboard() {
       const data = await resp.json();
 
       if (!resp.ok) {
-        alert(data.error || "Erro ao salvar alteração.");
+        showToast(data.error || "Erro ao salvar alteração.", "error");
         return;
       }
 
@@ -318,9 +329,10 @@ export default function PartnerDashboard() {
 
       setEditModalOpen(false);
       setEditingReward(null);
+      showToast("Vantagem atualizada com sucesso!", "success");
     } catch (err) {
       console.error("Erro ao editar vantagem:", err);
-      alert("Erro inesperado ao editar vantagem.");
+      showToast("Erro inesperado ao editar vantagem.", "error");
     } finally {
       setSalvandoEdicao(false);
     }
@@ -360,23 +372,21 @@ export default function PartnerDashboard() {
               />
             </label>
 
-           <label>
-            Custo em moedas *
-            <input
-              type="number"
-              min={1}
-              value={custo}
-              onChange={(e) => {
-                const value = e.target.value;
-                setCusto(value === "" ? "" : Number(value));
-              }}
-              onBlur={() => {
-                if (custo === "" || custo === null) setCusto(0);
-              }}
-            />
-          </label>
-
-
+            <label>
+              Custo em moedas *
+              <input
+                type="number"
+                min={1}
+                value={custo}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCusto(value === "" ? "" : Number(value));
+                }}
+                onBlur={() => {
+                  if (custo === "" || custo === null) setCusto(0);
+                }}
+              />
+            </label>
 
             <label>
               Imagem da vantagem (opcional)
@@ -433,9 +443,7 @@ export default function PartnerDashboard() {
                     <p className="texto-suave" style={{ marginTop: 4 }}>
                       {r.description}
                     </p>
-                    <p className="vantagem-custo">
-                      Custo: {r.cost} moedas
-                    </p>
+                    <p className="vantagem-custo">Custo: {r.cost} moedas</p>
                     <p className="texto-suave">
                       Status: {r.active ? "Ativa" : "Inativa"}
                     </p>

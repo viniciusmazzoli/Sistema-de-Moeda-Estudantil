@@ -1,10 +1,9 @@
 // src/pages/LoginPage.tsx
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+
 type Role = "aluno" | "professor" | "parceiro" | "admin";
-
-
 type RoleParam = "aluno" | "professor" | "parceiro" | "admin";
 
 const roleLabel: Record<RoleParam, string> = {
@@ -31,6 +30,14 @@ export default function LoginPage() {
   const [senha, setSenha] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+
+  // Aplica o fundo de imagem específico da tela de login
+  useEffect(() => {
+    document.body.classList.add("login-bg");
+    return () => {
+      document.body.classList.remove("login-bg");
+    };
+  }, []);
 
   if (!role || !roleLabel[role]) {
     return <div>Perfil inválido. Volte à página inicial.</div>;
@@ -124,7 +131,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
-            E-mail 
+            E-mail
             <input
               type="email"
               value={email}
@@ -134,7 +141,7 @@ export default function LoginPage() {
           </label>
 
           <label>
-            Senha 
+            Senha
             <input
               type="password"
               value={senha}
@@ -143,13 +150,27 @@ export default function LoginPage() {
             />
           </label>
 
-          <button type="submit" className="primary-button" disabled={carregando}>
+          <p
+            className="texto-suave"
+            style={{ fontSize: 14, marginBottom: 8, textAlign: "center" }}
+          >
+            <Link to="/esqueci-senha">Esqueceu a senha?</Link>
+          </p>
+
+          <button
+            type="submit"
+            className="primary-button"
+            disabled={carregando}
+          >
             {carregando ? "Entrando..." : "Entrar"}
           </button>
         </form>
 
         {erro && (
-          <p className="texto-suave" style={{ color: "#b91c1c", marginTop: 8 }}>
+          <p
+            className="texto-suave"
+            style={{ color: "#b91c1c", marginTop: 8 }}
+          >
             {erro}
           </p>
         )}

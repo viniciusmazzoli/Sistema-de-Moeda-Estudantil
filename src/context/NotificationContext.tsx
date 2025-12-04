@@ -7,6 +7,7 @@ import {
   ReactNode,
 } from "react";
 import { useAuth } from "./AuthContext";
+import { useToast } from "./ToastContext";
 
 interface Notification {
   id: number;
@@ -27,6 +28,7 @@ const NotificationContext = createContext<NotificationContextType | null>(null);
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const loadNotifications = async () => {
@@ -39,8 +41,35 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       const resp = await fetch(
         `http://localhost:3333/notifications/${user.backendId}`
       );
-      const data = await resp.json();
-      setNotifications(data);
+      const data: Notification[] = await resp.json();
+
+      // Notificações ainda não lidas
+      const unread = data.filter((n) => !n.read);
+
+      // Dispara toast para cada notificação nova
+      unread.forEach((n) => {
+        const texto = n.title ? `${n.title}: ${n.message}` : n.message;
+        showToast(texto, "info");
+      });
+
+      // Marca como lida no frontend
+      const atualizadas = data.map((n) =>
+        unread.some((u) => u.id === n.id) ? { ...n, read: true } : n
+      );
+      setNotifications(atualizadas);
+
+      // Marca como lida no backend (não bloqueia a tela)
+      if (unread.length > 0) {
+        Promise.all(
+          unread.map((n) =>
+            fetch(`http://localhost:3333/notifications/${n.id}/read`, {
+              method: "PATCH",
+            })
+          )
+        ).catch((err) =>
+          console.error("Erro ao marcar notificações como lidas:", err)
+        );
+      }
     } catch (err) {
       console.error("Erro ao carregar notificações:", err);
     }
@@ -55,7 +84,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       await fetch(`http://localhost:3333/notifications/${id}/read`, {
         method: "PATCH",
       });
-      await loadNotifications();
+
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
     } catch (err) {
       console.error("Erro ao marcar notificação como lida:", err);
     }

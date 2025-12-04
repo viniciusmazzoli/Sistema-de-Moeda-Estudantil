@@ -1,5 +1,5 @@
 // src/pages/RegisterPage.tsx
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Modal from "../components/Modal";
 import { useToast } from "../context/ToastContext";
@@ -23,6 +23,14 @@ export default function RegisterPage() {
   const { role } = useParams<{ role: Role }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
+
+  // Aplica o fundo de imagem específico da tela de cadastro
+  useEffect(() => {
+    document.body.classList.add("register-bg");
+    return () => {
+      document.body.classList.remove("register-bg");
+    };
+  }, []);
 
   if (!role || !roleLabel[role]) {
     return <div>Perfil inválido. Volte à página inicial.</div>;
@@ -195,7 +203,7 @@ export default function RegisterPage() {
                   type="text"
                   value={cpf}
                   onChange={(e) => setCpf(e.target.value)}
-                  required 
+                  required
                 />
               </label>
 
@@ -205,7 +213,7 @@ export default function RegisterPage() {
                   type="text"
                   value={rg}
                   onChange={(e) => setRg(e.target.value)}
-                  required 
+                  required
                 />
               </label>
 
@@ -215,7 +223,7 @@ export default function RegisterPage() {
                   type="text"
                   value={endereco}
                   onChange={(e) => setEndereco(e.target.value)}
-                  required 
+                  required
                 />
               </label>
 
@@ -225,7 +233,7 @@ export default function RegisterPage() {
                   type="text"
                   value={instituicao}
                   onChange={(e) => setInstituicao(e.target.value)}
-                  required 
+                  required
                 />
               </label>
 
@@ -235,7 +243,7 @@ export default function RegisterPage() {
                   type="text"
                   value={curso}
                   onChange={(e) => setCurso(e.target.value)}
-                  required 
+                  required
                 />
               </label>
             </>
@@ -249,7 +257,7 @@ export default function RegisterPage() {
                   type="text"
                   value={cpf}
                   onChange={(e) => setCpf(e.target.value)}
-                  required 
+                  required
                 />
               </label>
 
@@ -259,7 +267,7 @@ export default function RegisterPage() {
                   type="text"
                   value={instituicao}
                   onChange={(e) => setInstituicao(e.target.value)}
-                  required 
+                  required
                 />
               </label>
 
@@ -269,7 +277,7 @@ export default function RegisterPage() {
                   type="text"
                   value={departamento}
                   onChange={(e) => setDepartamento(e.target.value)}
-                  required 
+                  required
                 />
               </label>
             </>
@@ -283,7 +291,7 @@ export default function RegisterPage() {
                   type="text"
                   value={cnpj}
                   onChange={(e) => setCnpj(e.target.value)}
-                  required 
+                  required
                 />
               </label>
 
@@ -293,7 +301,7 @@ export default function RegisterPage() {
                   type="text"
                   value={contato}
                   onChange={(e) => setContato(e.target.value)}
-                  required 
+                  required
                 />
               </label>
 
@@ -303,13 +311,17 @@ export default function RegisterPage() {
                   type="text"
                   value={endereco}
                   onChange={(e) => setEndereco(e.target.value)}
-                  required 
+                  required
                 />
               </label>
             </>
           )}
 
-          <button type="submit" className="primary-button" disabled={carregando}>
+          <button
+            type="submit"
+            className="primary-button"
+            disabled={carregando}
+          >
             {carregando ? "Cadastrando..." : "Cadastrar"}
           </button>
         </form>

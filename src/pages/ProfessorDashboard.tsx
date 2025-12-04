@@ -4,6 +4,7 @@ import { Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Card from "../components/Card";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 interface BackendUser {
   id: number;
@@ -22,6 +23,7 @@ interface Envio {
 
 export default function ProfessorDashboard() {
   const { user } = useAuth(); // HOOK 1
+  const { showToast } = useToast();
 
   // TODOS os hooks aqui em cima
   const [saldo, setSaldo] = useState<number | null>(null);
@@ -67,13 +69,14 @@ export default function ProfessorDashboard() {
         setEnvios(enviados);
       } catch (err) {
         console.error("Erro ao carregar dados do professor:", err);
+        showToast("Erro ao carregar dados do professor.", "error");
       }
     };
 
     carregar();
-  }, [professorBackendId]);
+  }, [professorBackendId, showToast]);
 
-  // 🔐 proteção de rota: só entra se for professor
+  // proteção de rota: só entra se for professor
   if (!user || user.role !== "professor") {
     return <Navigate to="/" replace />;
   }
@@ -82,8 +85,8 @@ export default function ProfessorDashboard() {
     return (
       <Layout title="Área do Professor">
         <p>
-          Este usuário professor não está vinculado corretamente ao backend
-          (sem <code>backendId</code>).
+          Este usuário professor não está vinculado corretamente ao backend (sem{" "}
+          <code>backendId</code>).
         </p>
       </Layout>
     );
@@ -93,12 +96,12 @@ export default function ProfessorDashboard() {
     e.preventDefault();
 
     if (!alunoSelecionadoId) {
-      alert("Selecione um aluno para enviar moedas.");
+      showToast("Selecione um aluno para enviar moedas.", "error");
       return;
     }
 
     if (valor <= 0) {
-      alert("O valor deve ser maior que zero.");
+      showToast("O valor deve ser maior que zero.", "error");
       return;
     }
 
@@ -123,7 +126,7 @@ export default function ProfessorDashboard() {
 
       if (!resp.ok) {
         console.error(data);
-        alert(data.error || "Erro ao enviar moedas.");
+        showToast(data.error || "Erro ao enviar moedas.", "error");
         return;
       }
 
@@ -144,10 +147,11 @@ export default function ProfessorDashboard() {
       setMotivo("");
       setValor(10);
       setAlunoSelecionadoId("");
-      alert("Moedas enviadas com sucesso!");
+
+      showToast("Moedas enviadas com sucesso!", "success");
     } catch (err) {
       console.error("Erro ao enviar moedas:", err);
-      alert("Erro inesperado ao enviar moedas.");
+      showToast("Erro inesperado ao enviar moedas.", "error");
     } finally {
       setCarregando(false);
     }

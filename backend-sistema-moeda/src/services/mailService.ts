@@ -378,3 +378,44 @@ export async function sendRewardUsedEmails(params: {
     sendMail(partnerEmail, subjectParceiro, htmlParceiro),
   ]);
 }
+
+// ======================================================================
+// 5️⃣ Email — recuperação de senha
+// ======================================================================
+
+export async function sendPasswordResetEmail(params: {
+  to: string;
+  name?: string | null;
+  resetLink: string;
+}) {
+  const { to, name, resetLink } = params;
+
+  const subject = "Recuperação de senha - Sistema Mérito Estudantil";
+
+  const html = `
+    <p>Olá${name ? `, <strong>${name}</strong>` : ""}!</p>
+    <p>Recebemos uma solicitação para redefinir a senha da sua conta.</p>
+
+    <p>Para criar uma nova senha, clique no botão abaixo:</p>
+
+    <p style="text-align:center;margin:24px 0;">
+      <a href="${resetLink}"
+         style="display:inline-block;padding:12px 24px;background-color:#2563eb;color:#ffffff;
+                text-decoration:none;border-radius:999px;font-weight:600;font-size:14px;">
+        Redefinir minha senha
+      </a>
+    </p>
+
+    <p>Se o botão não funcionar, copie e cole o link abaixo no seu navegador:</p>
+    <p style="font-size:13px;color:#4b5563;word-break:break-all;">
+      ${resetLink}
+    </p>
+
+    <p style="margin-top:24px;font-size:13px;color:#6b7280;">
+      Se você não fez esta solicitação, pode ignorar este e-mail.
+    </p>
+  `;
+
+  await sendMail(to, subject, html);
+}
+

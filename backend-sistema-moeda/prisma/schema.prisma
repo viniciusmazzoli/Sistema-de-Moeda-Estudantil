@@ -34,6 +34,8 @@ model User {
   name         String
   email        String   @unique
   passwordHash String?
+  passwordResetToken       String?
+  passwordResetExpiresAt   DateTime?
   cpf          String?
   rg           String?
   address      String?
