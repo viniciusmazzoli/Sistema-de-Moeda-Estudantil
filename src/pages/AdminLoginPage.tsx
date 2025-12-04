@@ -1,5 +1,6 @@
 // src/pages/AdminLoginPage.tsx
-import { FormEvent, useState } from "react";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -16,7 +17,14 @@ export default function AdminLoginPage() {
     e.preventDefault();
 
     if (usuario === "admin" && senha === "1234") {
-      login({ nome: "Administrador", email: "admin@sme.com", role: "admin" });
+      // precisa bater com o tipo AuthUser (id, nome, email, role)
+      login({
+        id: 1,
+        nome: "Administrador",
+        email: "admin@sme.com",
+        role: "ADMIN",
+      });
+
       showToast("Login realizado com sucesso!", "success");
       navigate("/admin");
     } else {
