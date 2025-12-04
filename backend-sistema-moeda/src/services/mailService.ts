@@ -1,5 +1,7 @@
 // src/services/mailService.ts
 import nodemailer from "nodemailer";
+import type { SendMailOptions } from "nodemailer";
+import path from "path";
 
 const {
   SMTP_HOST,
@@ -91,7 +93,12 @@ function baseTemplate({
   `;
 }
 
-export async function sendMail(to: string, subject: string, html: string) {
+export async function sendMail(
+  to: string,
+  subject: string,
+  html: string,
+  attachments?: SendMailOptions["attachments"]
+) {
   if (!SMTP_FROM || !SMTP_USER) {
     console.log("[mailService] Envio ignorado (SMTP não configurado).");
     return;
@@ -102,6 +109,7 @@ export async function sendMail(to: string, subject: string, html: string) {
     to,
     subject,
     html,
+    attachments,
   });
 }
 
@@ -199,7 +207,7 @@ export async function sendProfessorConfirmationEmail(params: {
 }
 
 // ======================================================================
-// 3️⃣ Email — resgate de vantagem (aluno + parceiro)
+// 3️⃣ Email — resgate de vantagem (aluno + parceiro) com imagem (CID)
 // ======================================================================
 export async function sendRewardRedemptionEmails(params: {
   alunoNome: string;
@@ -208,6 +216,7 @@ export async function sendRewardRedemptionEmails(params: {
   partnerEmail: string;
   rewardTitle: string;
   couponCode: string;
+  imagePath?: string; // caminho do arquivo no disco (ex.: /absolute/path/uploads/img.jpg)
 }) {
   const {
     alunoNome,
@@ -216,7 +225,33 @@ export async function sendRewardRedemptionEmails(params: {
     partnerEmail,
     rewardTitle,
     couponCode,
+    imagePath,
   } = params;
+
+  const alunoCid = "reward-image-aluno";
+  const parceiroCid = "reward-image-parceiro";
+
+  const alunoAttachments: SendMailOptions["attachments"] | undefined =
+    imagePath
+      ? [
+          {
+            filename: path.basename(imagePath),
+            path: imagePath,
+            cid: alunoCid,
+          },
+        ]
+      : undefined;
+
+  const parceiroAttachments: SendMailOptions["attachments"] | undefined =
+    imagePath
+      ? [
+          {
+            filename: path.basename(imagePath),
+            path: imagePath,
+            cid: parceiroCid,
+          },
+        ]
+      : undefined;
 
   // Aluno
   const subjectAluno = `Cupom gerado: ${rewardTitle}`;
@@ -227,6 +262,23 @@ export async function sendRewardRedemptionEmails(params: {
       <p style="margin:0 0 12px;">
         Você acabou de resgatar a vantagem <strong>${rewardTitle}</strong>.
       </p>
+
+      ${
+        imagePath
+          ? `
+        <div style="margin:0 0 16px;">
+          <p style="margin:0 0 6px;font-size:13px;color:#4b5563;">
+            Esta é a imagem da vantagem que você resgatou:
+          </p>
+          <img
+            src="cid:${alunoCid}"
+            alt="${rewardTitle}"
+            style="max-width:100%;border-radius:12px;display:block;"
+          />
+        </div>
+        `
+          : ""
+      }
 
       <div style="background:#111827;color:#f9fafb;border-radius:12px;padding:14px 16px;text-align:center;margin-bottom:12px;">
         <p style="margin:0 0 4px;font-size:13px;opacity:0.9;">Código do seu cupom</p>
@@ -256,6 +308,23 @@ export async function sendRewardRedemptionEmails(params: {
         Um aluno resgatou uma vantagem do seu estabelecimento no Sistema de Mérito Estudantil.
       </p>
 
+      ${
+        imagePath
+          ? `
+        <div style="margin:0 0 16px;">
+          <p style="margin:0 0 6px;font-size:13px;color:#4b5563;">
+            Imagem da vantagem resgatada:
+          </p>
+          <img
+            src="cid:${parceiroCid}"
+            alt="${rewardTitle}"
+            style="max-width:100%;border-radius:12px;display:block;"
+          />
+        </div>
+        `
+          : ""
+      }
+
       <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin-bottom:12px;">
         <tr>
           <td style="font-size:13px;color:#6b7280;padding:6px 0;">Aluno</td>
@@ -281,8 +350,8 @@ export async function sendRewardRedemptionEmails(params: {
     `,
   });
 
-  await sendMail(alunoEmail, subjectAluno, htmlAluno);
-  await sendMail(partnerEmail, subjectParceiro, htmlParceiro);
+  await sendMail(alunoEmail, subjectAluno, htmlAluno, alunoAttachments);
+  await sendMail(partnerEmail, subjectParceiro, htmlParceiro, parceiroAttachments);
 }
 
 // ======================================================================
@@ -418,4 +487,3 @@ export async function sendPasswordResetEmail(params: {
 
   await sendMail(to, subject, html);
 }
-

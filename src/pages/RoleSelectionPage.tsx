@@ -11,7 +11,7 @@ export default function RoleSelectionPage() {
   };
 
   return (
-    <div className="center-page">
+    <div className="role-selection-background">
       <div className="role-container">
         <img src="/LogoAcademi.png" alt="Logo da Academia" className="logo" />
         <p>Selecione como deseja acessar:</p>

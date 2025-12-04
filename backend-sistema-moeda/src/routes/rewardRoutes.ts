@@ -6,6 +6,7 @@ import {
   sendRewardUsedEmails,
 } from "../services/mailService";
 import { upload } from "../middleware/upload";
+import path from "path";
 
 const router = Router();
 
@@ -233,7 +234,10 @@ router.post("/redeem", async (req, res) => {
         .json({ error: "Saldo insuficiente para resgatar esta vantagem." });
     }
 
-    const couponCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const couponCode = Math.random()
+      .toString(36)
+      .substring(2, 10)
+      .toUpperCase();
 
     const result = await prisma.$transaction(async (tx) => {
       const updatedAccount = await tx.account.update({
@@ -264,6 +268,14 @@ router.post("/redeem", async (req, res) => {
       return { updatedAccount, redemption, transaction };
     });
 
+    // 🔗 Monta caminho absoluto da imagem para o e-mail (CID)
+    const imagePath =
+      reward.imageUrl && reward.imageUrl.length > 0
+        ? reward.imageUrl.startsWith("http")
+          ? reward.imageUrl // se um dia você salvar URL absoluta
+          : path.join(process.cwd(), reward.imageUrl.replace(/^\//, ""))
+        : undefined;
+
     if (aluno.email && reward.partner?.email) {
       sendRewardRedemptionEmails({
         alunoNome: aluno.name,
@@ -272,6 +284,7 @@ router.post("/redeem", async (req, res) => {
         partnerEmail: reward.partner.email,
         rewardTitle: reward.title,
         couponCode,
+        imagePath,
       }).catch((err) => {
         console.error("Erro ao enviar emails de resgate:", err);
       });
