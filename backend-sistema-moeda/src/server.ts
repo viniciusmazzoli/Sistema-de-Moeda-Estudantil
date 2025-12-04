@@ -187,7 +187,9 @@ app.use("/notifications", notificationRoutes);
 // ----------------------------
 //        START SERVER
 // ----------------------------
-const PORT = 3333;
+const PORT = process.env.PORT || 3333;
+
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
+
