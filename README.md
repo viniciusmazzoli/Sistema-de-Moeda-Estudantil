@@ -1,168 +1,121 @@
-## 🎓 Sistema de Moeda Estudantil
+# 🎓 Sistema de Moeda Estudantil
 
-Um sistema desenvolvido para reconhecer e valorizar o mérito estudantil por meio de uma moeda virtual, distribuída por professores e utilizada por alunos para resgatar produtos e vantagens oferecidas por empresas parceiras.
-O projeto segue arquitetura MVC e utiliza tecnologias modernas de desenvolvimento web.
+Um sistema inovador desenvolvido para **reconhecer e valorizar o mérito estudantil** por meio de uma moeda virtual. Professores distribuem a moeda, e alunos a utilizam para resgatar produtos e vantagens exclusivas oferecidas por empresas parceiras.
 
-## 🚀 Visão Geral
+O projeto adota a arquitetura **MVC (Model–View–Controller)** e utiliza um conjunto de tecnologias modernas de desenvolvimento web.
 
-O sistema permite:
+---
 
-Cadastro de alunos, professores e empresas parceiras
+## 🚀 Visão Geral e Funcionalidades
 
-Envio de moedas por professores
+O sistema oferece uma plataforma completa para a gestão da moeda estudantil, abrangendo as seguintes funcionalidades:
 
-Notificações automáticas por e-mail
+| Módulo | Funcionalidades Principais |
+| :--- | :--- |
+| **Geral** | Cadastro de alunos, professores e empresas parceiras. Autenticação e controle de acesso. |
+| **Transações** | Envio de moedas por professores. Consulta de extrato de transações. |
+| **Vantagens** | Cadastro de vantagens pelas empresas. Troca de moedas por produtos ou descontos. |
+| **Notificações** | Notificações automáticas por e-mail. Visualização de notificações na homepage. |
+| **Resgate** | Geração e envio de cupons com código de confirmação para validação. |
 
-Visualização de notificações na homepage para usuários notificados
+### 📌 Funcionalidades por Perfil
 
-Consulta de extrato de transações
+| Perfil | Ações Permitidas |
+| :--- | :--- |
+| **👨‍🏫 Professores** | Enviar moedas aos alunos, registrar o motivo do reconhecimento, consultar extrato e saldo total, receber notificações importantes por e-mail. |
+| **👨‍🎓 Alunos** | Realizar cadastro completo, receber moedas e notificações por e-mail, acessar extrato detalhado, trocar moedas por vantagens cadastradas, receber cupom de troca com código único. |
+| **🏢 Empresas Parceiras** | Cadastrar vantagens (título, descrição e foto), receber notificação por e-mail quando um cupom é resgatado, validar o código enviado pelo sistema. |
 
-Cadastro de vantagens pelas empresas
+### ✉️ Sistema de Notificações
 
-Troca de moedas por produtos ou descontos
+O sistema utiliza o **Nodemailer** para disparar e-mails automáticos nos seguintes eventos:
+*   Envio de moedas por professores.
+*   Recebimento de moedas pelos alunos.
+*   Resgate de vantagens.
+*   Envio de cupom contendo código gerado pelo sistema.
+*   Notificação à empresa parceira para validação.
 
-Geração e envio de cupons com código de confirmação
-
-Autenticação e controle de acesso
+---
 
 ## 🛠️ Tecnologias Utilizadas
 
-As principais tecnologias utilizadas no projeto foram:
+O projeto foi construído com foco em performance, segurança e manutenibilidade, utilizando as seguintes tecnologias:
 
-TypeScript – Tipagem estática e maior segurança no desenvolvimento
+| Categoria | Tecnologia | Propósito |
+| :--- | :--- | :--- |
+| **Frontend** | **React** + **Vite** | Interface do usuário (View) e servidor de desenvolvimento rápido. |
+| | **TypeScript** | Tipagem estática para maior segurança e escalabilidade. |
+| | **JavaScript (ES6+)** | Lógica de interface e manipulação de DOM. |
+| | **HTML5** / **CSS3** | Estruturação das páginas e estilização responsiva. |
+| **Backend** | **Node.js** + **Express** | Criação da API REST (Controller e parte do Model). |
+| | **Prisma ORM** | Acesso e modelagem do banco de dados. |
+| | **Nodemailer** | Envio de e-mails transacionais. |
 
-JavaScript (ES6+) – Lógica de interface e manipulação de DOM
-
-HTML5 – Estruturação das páginas
-
-CSS3 – Estilização e layout responsivo
-
-No back-end e integração com o banco de dados foram utilizados:
-
-Node.js + Express – Criação da API REST
-
-Prisma ORM – Acesso e modelagem do banco de dados
-
-Nodemailer – Envio de e-mails transacionais
+---
 
 ## 🏗️ Arquitetura do Projeto
 
-O projeto foi desenvolvido seguindo o padrão MVC (Model–View–Controller):
+O projeto segue o padrão **MVC (Model–View–Controller)** para garantir organização, facilidade de manutenção e clareza no fluxo do sistema:
 
-Model → Regras de negócio e estruturas de dados
+*   **Model**: Contém as regras de negócio e estruturas de dados.
+*   **View**: Interface do usuário, construída com HTML, CSS e React/TypeScript.
+*   **Controller**: Lógica de aplicação, fluxos de uso e coordenação entre as camadas.
 
-View → Interface do usuário construída com HTML, CSS e JS/TS (React)
+### 📂 Organização do Repositório
 
-Controller → Lógica de aplicação, fluxos de uso e coordenação entre camadas
+A estrutura geral do repositório é a seguinte:
 
-Essa divisão garante melhor organização, facilidade de manutenção e clareza no fluxo do sistema.
+```
+/
+├── src/
+│   ├── routes/        # Rotas da API (transactions, rewards, auth, etc.)
+│   ├── services/      # Serviços (e-mail, notificações, etc.)
+│   ├── middleware/    # Middlewares (upload, autenticação, etc.)
+│   ├── prisma.ts      # Conexão com o banco de dados
+│   └── server.ts      # Servidor Express (API)
+├── pages/             # Páginas React (RoleSelection, Login, Dashboards)
+├── components/        # Componentes reutilizáveis (Layout, Card, etc.)
+├── contexts/          # Contextos (Auth, Toast, Notificações)
+├── styles/            # Estilização geral
+├── public/
+│   ├── LogoAcademi.png
+│   └── bg-academi.jpg # Imagem de fundo da tela de seleção de perfil
+├── README.md
+├── package.json
+└── tsconfig.json
+```
 
-## 📌 Funcionalidades
-👨‍🏫 Professores
+---
 
-Podem enviar moedas aos alunos
+## 🧭 Instruções para Rodar a Aplicação
 
-Registram o motivo do reconhecimento
+A aplicação é composta por uma **API em Node.js/Express** (back-end) e uma **interface web em React + Vite** (front-end).
 
-Consultam extrato e saldo total
+### 1. Pré-requisitos
 
-Recebem notificações importantes por e-mail
+Certifique-se de ter instalado:
+*   **Node.js 18+**
+*   **npm** (instalado junto com o Node)
+*   Banco de dados configurado (conforme `prisma.ts`)
+*   Acesso a um servidor **SMTP** (ex: Gmail com senha de app)
 
-👨‍🎓 Alunos
+### 2. Instalar Dependências
 
-Realizam cadastro completo
+No diretório raiz do projeto, execute:
 
-Recebem moedas e são notificados por e-mail
-
-Acessam extrato detalhado
-
-Trocarm moedas por vantagens cadastradas
-
-Recebem cupom de troca com código único
-
-🏢 Empresas Parceiras
-
-Cadastram vantagens contendo título, descrição e foto
-
-Recebem notificação por e-mail quando um cupom é resgatado
-
-Validam o código enviado pelo sistema
-
-✉️ Sistema de Notificações
-
-Os seguintes eventos disparam e-mails automáticos:
-
-Envio de moedas por professores
-
-Recebimento de moedas pelos alunos
-
-Resgate de vantagens
-
-Envio de cupom contendo código gerado pelo sistema
-
-Notificação à empresa parceira para validação
-
-## 📂 Organização do Repositório
-
-O repositório segue esta estrutura geral:
-
-/src
-  /routes         # Rotas da API (transactions, rewards, auth, etc.)
-  /services       # Serviços (e-mail, notificações, etc.)
-  /middleware     # Middlewares (upload, autenticação, etc.)
-  /prisma.ts      # Conexão com o banco de dados
-  /server.ts      # Servidor Express (API)
-  /pages          # Páginas React (RoleSelection, Login, Dashboards)
-  /components     # Componentes reutilizáveis (Layout, Card, etc.)
-  /contexts       # Contextos (Auth, Toast, Notificações)
-  /styles         # Estilização geral
-
-/public
-  LogoAcademi.png
-  bg-academi.jpg  # Imagem de fundo da tela de seleção de perfil
-
-README.md
-package.json
-tsconfig.json
-
-## 📈 Processo de Desenvolvimento
-
-Este projeto foi construído ao longo das releases definidas no laboratório:
-
-Release 01 → Modelagem, arquitetura, CRUDs iniciais
-
-Release 02 → Envio de moedas, extratos, vantagens, trocas
-
-Release 03 → Envio de cupons, refatorações e melhorias gerais
-
-## 🧭 6 Instruções para rodar a aplicação
-
-A aplicação é composta por uma API em Node.js/Express (responsável por regras de negócio, banco de dados e envio de e-mails) e uma interface web em React + Vite.
-
-6.1. Pré-requisitos
-
-Node.js 18+
-
-npm (instalado junto com o Node)
-
-Banco de dados configurado conforme o prisma.ts
-
-Acesso a um servidor SMTP (por exemplo, Gmail com senha de app)
-
-6.2. Instalar dependências
-
-No diretório raiz do projeto:
-
+```bash
 npm install
+```
 
-6.3. Configurar variáveis de ambiente
+### 3. Configurar Variáveis de Ambiente
 
-Crie um arquivo .env na raiz com as configurações da aplicação, por exemplo:
+Crie um arquivo `.env` na raiz do projeto com as seguintes configurações:
 
+```ini
 # Porta da API
 PORT=3333
 
-# Banco de dados (exemplo usando SQLite / ajuste conforme o seu ambiente)
+# Banco de dados (exemplo usando SQLite / ajuste conforme seu ambiente)
 DATABASE_URL="file:./dev.db"
 
 # SMTP para envio de e-mails
@@ -171,81 +124,68 @@ SMTP_PORT=587
 SMTP_USER=seu_email@gmail.com
 SMTP_PASS=sua_senha_de_app
 SMTP_FROM="Sistema de Mérito Estudantil <seu_email@gmail.com>"
+```
 
+> ⚠️ **Ajuste:** Caso utilize outro provedor de e-mail ou outro banco de dados, modifique os valores acima.
 
-Caso utilize outro provedor de e-mail ou outro banco, basta ajustar os valores acima.
+### 4. Preparar o Banco de Dados
 
-6.4. Preparar o banco de dados
+Se estiver utilizando **Prisma**, execute as migrations para preparar o banco de dados:
 
-Caso esteja utilizando Prisma, execute as migrations (ou o script equivalente configurado no seu ambiente):
-
+```bash
 npx prisma migrate dev
-# e opcionalmente:
-npx prisma generate
+# Opcional: npx prisma generate
+```
 
-6.5. Subir a API (back-end)
+### 5. Subir a API (Back-end)
 
-Execute o servidor Express responsável por toda a lógica de negócio:
+Execute o servidor Express responsável pela lógica de negócio:
 
+```bash
 npx ts-node server.ts
+# Ou, se houver script configurado: npm run api
+```
 
+A API estará disponível em: `http://localhost:3333`
 
-ou, se houver script configurado:
+### 6. Subir a Interface Web (Front-end)
 
-npm run api   # exemplo
+Em um **novo terminal**, ainda na raiz do projeto, execute:
 
-
-A API ficará disponível em:
-
-http://localhost:3333
-
-6.6. Subir a interface web (front-end)
-
-Em outro terminal, ainda na raiz do projeto, execute:
-
+```bash
 npm run dev
+```
 
+O Vite iniciará o servidor de desenvolvimento em: `http://localhost:5173`
 
-O Vite iniciará o servidor de desenvolvimento em:
+A aplicação web consumirá a API disponível em `http://localhost:3333`.
 
-http://localhost:5173
+### Resumo Rápido
 
-
-A aplicação web consumirá a API disponível em http://localhost:3333.
-
-6.7. Resumo rápido
-
+```bash
 npm install
+# Criar .env com DATABASE_URL, SMTP_* e PORT
+npx prisma migrate dev
+npx ts-node server.ts  # Rodar a API
+npm run dev            # Rodar o front
+# Acessar em http://localhost:5173
+```
 
-Criar .env com DATABASE_URL, SMTP_* e PORT
-
-npx prisma migrate dev (se aplicável)
-
-Rodar a API → npx ts-node server.ts
-
-Rodar o front → npm run dev
-
-Acessar em http://localhost:5173
+---
 
 ## 👥 Participantes
 
-Vinicius Mazzoli
-
-Matheus Santos
-
-Gabriel Burdgnon
+*   Vinicius Mazzoli
+*   Matheus Santos
+*   Gabriel Burdgnon
 
 ## 🤝 Contribuições
 
-Contribuições são bem-vindas!
-Este projeto também faz parte do processo de análise crítica entre grupos, envolvendo:
-
-Sugestões de melhorias
-
-Refatoração de código
-
-Pull requests documentados
+Contribuições são muito bem-vindas! Este projeto também faz parte de um processo de análise crítica, e aceitamos:
+*   Sugestões de melhorias
+*   Refatoração de código
+*   Pull requests documentados
 
 ## 📜 Licença
 
-Este é um projeto acadêmico. Uso permitido apenas para fins educacionais.
+Este é um **projeto acadêmico**. O uso é permitido apenas para fins educacionais.
