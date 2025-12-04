@@ -1,233 +1,168 @@
-## 🎓 Sistema de Moeda Estudantil
+✅ README estilo GitHub PRO – Pronto para copiar e colar
+🎓 Sistema de Moeda Estudantil — Release 3
+<div align="center">
 
-Um sistema desenvolvido para reconhecer e valorizar o mérito estudantil por meio de uma moeda virtual, distribuída por professores e utilizada por alunos para resgatar produtos e vantagens oferecidas por empresas parceiras.
-O projeto segue arquitetura MVC e utiliza tecnologias modernas de desenvolvimento web.
 
-## 🚀 Visão Geral
 
-O sistema permite:
 
-Cadastro de alunos, professores e empresas parceiras
 
-Envio de moedas por professores
 
-Notificações automáticas por e-mail
 
-Visualização de notificações na homepage para usuários notificados
 
-Consulta de extrato de transações
 
-Cadastro de vantagens pelas empresas
 
-Troca de moedas por produtos ou descontos
+</div>
+📘 Sobre o Projeto
 
-Geração e envio de cupons com código de confirmação
+O Sistema de Mérito Estudantil é uma plataforma completa para reconhecimento do desempenho acadêmico por meio de moedas virtuais, enviadas por professores e trocadas por benefícios oferecidos por empresas parceiras.
 
-Autenticação e controle de acesso
+O projeto implementa:
 
-## 🛠️ Tecnologias Utilizadas
+Cadastro de usuários (Aluno, Professor, Parceiro, Admin)
 
-As principais tecnologias utilizadas no projeto foram:
+Envio de moedas com motivo registrado
 
-TypeScript – Tipagem estática e maior segurança no desenvolvimento
+Resgate de vantagens com código único
 
-JavaScript (ES6+) – Lógica de interface e manipulação de DOM
+Envio de e-mails automáticos (com imagens)
 
-HTML5 – Estruturação das páginas
+Validação de cupons por empresas
 
-CSS3 – Estilização e layout responsivo
+Controle de saldo e extrato
 
-No back-end e integração com o banco de dados foram utilizados:
+Upload de imagens e CRUD completo
 
-Node.js + Express – Criação da API REST
+Autenticação com controle de acesso
 
-Prisma ORM – Acesso e modelagem do banco de dados
+Interface web moderna e responsiva
 
-Nodemailer – Envio de e-mails transacionais
+🛠️ Tecnologias Utilizadas
+<div style="display: flex; gap: 10px;">
 
-## 🏗️ Arquitetura do Projeto
 
-O projeto foi desenvolvido seguindo o padrão MVC (Model–View–Controller):
 
-Model → Regras de negócio e estruturas de dados
 
-View → Interface do usuário construída com HTML, CSS e JS/TS (React)
 
-Controller → Lógica de aplicação, fluxos de uso e coordenação entre camadas
 
-Essa divisão garante melhor organização, facilidade de manutenção e clareza no fluxo do sistema.
 
-## 📌 Funcionalidades
-👨‍🏫 Professores
 
-Podem enviar moedas aos alunos
 
-Registram o motivo do reconhecimento
 
-Consultam extrato e saldo total
 
-Recebem notificações importantes por e-mail
 
-👨‍🎓 Alunos
 
-Realizam cadastro completo
 
-Recebem moedas e são notificados por e-mail
 
-Acessam extrato detalhado
 
-Trocarm moedas por vantagens cadastradas
-
-Recebem cupom de troca com código único
-
-🏢 Empresas Parceiras
-
-Cadastram vantagens contendo título, descrição e foto
-
-Recebem notificação por e-mail quando um cupom é resgatado
-
-Validam o código enviado pelo sistema
-
-✉️ Sistema de Notificações
-
-Os seguintes eventos disparam e-mails automáticos:
-
-Envio de moedas por professores
-
-Recebimento de moedas pelos alunos
-
-Resgate de vantagens
-
-Envio de cupom contendo código gerado pelo sistema
-
-Notificação à empresa parceira para validação
-
-## 📂 Organização do Repositório
-
-O repositório segue esta estrutura geral:
-
+</div>
+🏗️ Arquitetura do Sistema (MVC)
 /src
-  /routes         # Rotas da API (transactions, rewards, auth, etc.)
-  /services       # Serviços (e-mail, notificações, etc.)
-  /middleware     # Middlewares (upload, autenticação, etc.)
-  /prisma.ts      # Conexão com o banco de dados
-  /server.ts      # Servidor Express (API)
-  /pages          # Páginas React (RoleSelection, Login, Dashboards)
-  /components     # Componentes reutilizáveis (Layout, Card, etc.)
-  /contexts       # Contextos (Auth, Toast, Notificações)
-  /styles         # Estilização geral
+ ├── controllers/      # Lógica de rotas e fluxos
+ ├── models/           # Prisma ORM, tabelas e entidades
+ ├── services/         # E-mails, regras de negócio, upload
+ ├── routes/           # Endpoints agrupados
+ ├── middleware/       # Autenticação, upload, validação
+ ├── public/           # Interfaces HTML/CSS/JS
+ └── prisma/           # Schema e migrações
 
-/public
-  LogoAcademi.png
-  bg-academi.jpg  # Imagem de fundo da tela de seleção de perfil
+📌 Funcionalidades Principais
+👨‍🏫 Professores
+Funcionalidade	Status
+Envio de moedas para alunos	✔️
+Motivo detalhado	✔️
+Extrato de transações	✔️
+Notificações por e-mail	✔️
+👨‍🎓 Alunos
+Funcionalidade	Status
+Receber moedas	✔️
+Extrato e saldo	✔️
+Resgatar vantagens	✔️
+Receber cupom por e-mail (com imagem)	✔️
+🏢 Parceiros
+Funcionalidade	Status
+Cadastro de vantagens	✔️
+Upload de imagem	✔️
+Validação de cupons	✔️
+Notificação automática	✔️
+📨 Sistema de Notificações Automáticas
 
-README.md
-package.json
-tsconfig.json
+O sistema envia e-mails para:
 
-## 📈 Processo de Desenvolvimento
+Aluno ao receber moedas
 
-Este projeto foi construído ao longo das releases definidas no laboratório:
+Professor ao enviar moedas
 
-Release 01 → Modelagem, arquitetura, CRUDs iniciais
+Parceiro e aluno ao resgatar cupom
 
-Release 02 → Envio de moedas, extratos, vantagens, trocas
+Parceiro e aluno ao validar cupom
 
-Release 03 → Envio de cupons, refatorações e melhorias gerais
+Recuperação de senha
 
-## 🧭 6 Instruções para rodar a aplicação
+E-mails incluem imagens via CID
 
-A aplicação é composta por uma API em Node.js/Express (responsável por regras de negócio, banco de dados e envio de e-mails) e uma interface web em React + Vite.
+🖼️ Exemplos de E-mails Gerados
 
-6.1. Pré-requisitos
+Cupom com código único
+
+Imagem da vantagem resgatada
+
+Layout responsivo e premium
+
+Notificações profissionais
+
+(acesse /src/services/mailService.ts para visualizar os templates)
+
+📌 Instruções para Rodar o Projeto
+1️⃣ Pré-requisitos
+
+Certifique-se de ter instalado:
 
 Node.js 18+
 
-npm (instalado junto com o Node)
+npm ou yarn
 
-Banco de dados configurado conforme o prisma.ts
+PostgreSQL (ou SQLite se configurado)
 
-Acesso a um servidor SMTP (por exemplo, Gmail com senha de app)
+Prisma CLI
 
-6.2. Instalar dependências
+2️⃣ Clone o repositório
+git clone https://github.com/seu-repo/sistema-moeda-estudantil.git
+cd sistema-moeda-estudantil
 
-No diretório raiz do projeto:
-
+3️⃣ Instale as dependências
 npm install
 
-6.3. Configurar variáveis de ambiente
+4️⃣ Configure o arquivo .env
 
-Crie um arquivo .env na raiz com as configurações da aplicação, por exemplo:
+Crie um arquivo:
 
-# Porta da API
-PORT=3333
-
-# Banco de dados (exemplo usando SQLite / ajuste conforme o seu ambiente)
-DATABASE_URL="file:./dev.db"
-
-# SMTP para envio de e-mails
-SMTP_HOST=smtp.gmail.com
+DATABASE_URL="postgresql://user:password@localhost:5432/merito"
+SMTP_HOST=smtp.seuservidor.com
 SMTP_PORT=587
-SMTP_USER=seu_email@gmail.com
-SMTP_PASS=sua_senha_de_app
-SMTP_FROM="Sistema de Mérito Estudantil <seu_email@gmail.com>"
+SMTP_USER=seuemail
+SMTP_PASS=suasenha
+SMTP_FROM="Merito <no-reply@merito.com>"
 
-
-Caso utilize outro provedor de e-mail ou outro banco, basta ajustar os valores acima.
-
-6.4. Preparar o banco de dados
-
-Caso esteja utilizando Prisma, execute as migrations (ou o script equivalente configurado no seu ambiente):
-
+5️⃣ Execute as migrações do banco
 npx prisma migrate dev
-# e opcionalmente:
-npx prisma generate
 
-6.5. Subir a API (back-end)
-
-Execute o servidor Express responsável por toda a lógica de negócio:
-
-npx ts-node server.ts
-
-
-ou, se houver script configurado:
-
-npm run api   # exemplo
-
-
-A API ficará disponível em:
-
-http://localhost:3333
-
-6.6. Subir a interface web (front-end)
-
-Em outro terminal, ainda na raiz do projeto, execute:
-
+6️⃣ Inicie o servidor backend
 npm run dev
 
 
-O Vite iniciará o servidor de desenvolvimento em:
+Servidor rodará em:
+
+http://localhost:3000
+
+7️⃣ Inicie o frontend
+npm run dev --prefix frontend
+
+
+Frontend rodará em:
 
 http://localhost:5173
 
-
-A aplicação web consumirá a API disponível em http://localhost:3333.
-
-6.7. Resumo rápido
-
-npm install
-
-Criar .env com DATABASE_URL, SMTP_* e PORT
-
-npx prisma migrate dev (se aplicável)
-
-Rodar a API → npx ts-node server.ts
-
-Rodar o front → npm run dev
-
-Acessar em http://localhost:5173
-
-## 👥 Participantes
+👥 Participantes
 
 Vinicius Mazzoli
 
@@ -235,17 +170,11 @@ Matheus Santos
 
 Gabriel Burdgnon
 
-## 🤝 Contribuições
+🤝 Contribuindo
 
-Contribuições são bem-vindas!
-Este projeto também faz parte do processo de análise crítica entre grupos, envolvendo:
+Pull Requests são bem-vindos.
+Sinta-se livre para sugerir melhorias no código, interface ou arquitetura.
 
-Sugestões de melhorias
+📜 Licença
 
-Refatoração de código
-
-Pull requests documentados
-
-## 📜 Licença
-
-Este é um projeto acadêmico. Uso permitido apenas para fins educacionais.
+Uso permitido somente para fins educacionais.
