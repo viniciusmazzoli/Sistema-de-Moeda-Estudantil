@@ -1,11 +1,11 @@
 // src/pages/PartnerDashboard.tsx
-import { FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Card from "../components/Card";
 import { useAuth } from "../context/AuthContext";
 import Modal from "../components/Modal";
-import { useToast } from "../context/ToastContext"; // ⬅️ NOVO
+import { useToast } from "../context/ToastContext";
 
 interface Reward {
   id: number;
@@ -21,7 +21,7 @@ type StatusFiltro = "TODOS" | "GERADO" | "UTILIZADO";
 
 export default function PartnerDashboard() {
   const { user } = useAuth();
-  const { showToast } = useToast(); // ⬅️ NOVO
+  const { showToast } = useToast();
 
   // Proteção de rota
   if (!user || user.role !== "parceiro") {

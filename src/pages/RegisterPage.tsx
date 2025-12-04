@@ -1,5 +1,5 @@
 // src/pages/RegisterPage.tsx
-import { FormEvent, useState, useEffect } from "react";
+import { type FormEvent, useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Modal from "../components/Modal";
 import { useToast } from "../context/ToastContext";

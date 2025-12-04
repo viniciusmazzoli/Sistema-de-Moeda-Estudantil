@@ -1,5 +1,5 @@
 // src/pages/ProfessorDashboard.tsx
-import { FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Card from "../components/Card";
