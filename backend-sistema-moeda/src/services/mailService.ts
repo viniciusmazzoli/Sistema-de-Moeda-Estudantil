@@ -2,6 +2,7 @@
 import nodemailer from "nodemailer";
 import type { SendMailOptions } from "nodemailer";
 import path from "path";
+import QRCode from "qrcode";
 
 const {
   SMTP_HOST,
@@ -113,6 +114,16 @@ export async function sendMail(
   });
 }
 
+/**
+ * Gera um QR Code em PNG (Buffer) a partir de um texto
+ */
+async function generateQrCodePng(text: string): Promise<Buffer> {
+  return QRCode.toBuffer(text, {
+    type: "png",
+    width: 300,
+  });
+}
+
 // ======================================================================
 // 1️⃣ Email — aluno recebeu moedas do professor
 // ======================================================================
@@ -207,7 +218,7 @@ export async function sendProfessorConfirmationEmail(params: {
 }
 
 // ======================================================================
-// 3️⃣ Email — resgate de vantagem (aluno + parceiro) com imagem (CID)
+// 3️⃣ Email — resgate de vantagem (aluno + parceiro) com imagem + QR Code
 // ======================================================================
 export async function sendRewardRedemptionEmails(params: {
   alunoNome: string;
@@ -228,30 +239,49 @@ export async function sendRewardRedemptionEmails(params: {
     imagePath,
   } = params;
 
+  // conteúdo único do QR (pode ser só o código,
+  // ou algo mais completo, como um prefixo ou URL)
+  const qrContent = `COUPON:${couponCode}`;
+  const qrBuffer = await generateQrCodePng(qrContent);
+
   const alunoCid = "reward-image-aluno";
   const parceiroCid = "reward-image-parceiro";
+  const qrCidAluno = "coupon-qrcode-aluno";
+  const qrCidParceiro = "coupon-qrcode-parceiro";
 
-  const alunoAttachments: SendMailOptions["attachments"] | undefined =
-    imagePath
-      ? [
-          {
-            filename: path.basename(imagePath),
-            path: imagePath,
-            cid: alunoCid,
-          },
-        ]
-      : undefined;
+  const alunoAttachments: SendMailOptions["attachments"] = [];
 
-  const parceiroAttachments: SendMailOptions["attachments"] | undefined =
-    imagePath
-      ? [
-          {
-            filename: path.basename(imagePath),
-            path: imagePath,
-            cid: parceiroCid,
-          },
-        ]
-      : undefined;
+  if (imagePath) {
+    alunoAttachments.push({
+      filename: path.basename(imagePath),
+      path: imagePath,
+      cid: alunoCid,
+    });
+  }
+
+  // QR Code para o aluno
+  alunoAttachments.push({
+    filename: `coupon-${couponCode}-aluno.png`,
+    content: qrBuffer,
+    cid: qrCidAluno,
+  });
+
+  const parceiroAttachments: SendMailOptions["attachments"] = [];
+
+  if (imagePath) {
+    parceiroAttachments.push({
+      filename: path.basename(imagePath),
+      path: imagePath,
+      cid: parceiroCid,
+    });
+  }
+
+  // QR Code para o parceiro
+  parceiroAttachments.push({
+    filename: `coupon-${couponCode}-parceiro.png`,
+    content: qrBuffer,
+    cid: qrCidParceiro,
+  });
 
   // Aluno
   const subjectAluno = `Cupom gerado: ${rewardTitle}`;
@@ -287,12 +317,23 @@ export async function sendRewardRedemptionEmails(params: {
         </p>
       </div>
 
+      <div style="text-align:center;margin:12px 0 16px;">
+        <p style="margin:0 0 6px;font-size:13px;color:#4b5563;">
+          Você também pode usar o QR Code abaixo:
+        </p>
+        <img
+          src="cid:${qrCidAluno}"
+          alt="QR Code do cupom"
+          style="width:160px;height:160px;object-fit:contain;"
+        />
+      </div>
+
       <p style="margin:0 0 4px;font-size:13px;color:#4b5563;">
         <strong>Parceiro:</strong> ${partnerNome}
       </p>
 
       <p style="margin:8px 0 0;font-size:13px;color:#4b5563;">
-        Apresente este código na hora da utilização do benefício para que o parceiro
+        Apresente este código ou o QR Code na hora da utilização do benefício para que o parceiro
         possa validar o cupom.
       </p>
     `,
@@ -343,15 +384,31 @@ export async function sendRewardRedemptionEmails(params: {
         </p>
       </div>
 
+      <div style="text-align:center;margin:12px 0 16px;">
+        <p style="margin:0 0 6px;font-size:13px;color:#e5e7eb;">
+          O aluno também poderá apresentar este QR Code:
+        </p>
+        <img
+          src="cid:${qrCidParceiro}"
+          alt="QR Code do cupom"
+          style="width:160px;height:160px;object-fit:contain;"
+        />
+      </div>
+
       <p style="margin:0;font-size:13px;color:#4b5563;">
-        No momento do atendimento, confira o código informado pelo aluno e utilize
+        No momento do atendimento, confira o código ou o QR Code informado pelo aluno e utilize
         a área de parceiro no sistema para marcar o cupom como <strong>UTILIZADO</strong>.
       </p>
     `,
   });
 
   await sendMail(alunoEmail, subjectAluno, htmlAluno, alunoAttachments);
-  await sendMail(partnerEmail, subjectParceiro, htmlParceiro, parceiroAttachments);
+  await sendMail(
+    partnerEmail,
+    subjectParceiro,
+    htmlParceiro,
+    parceiroAttachments
+  );
 }
 
 // ======================================================================
@@ -451,7 +508,6 @@ export async function sendRewardUsedEmails(params: {
 // ======================================================================
 // 5️⃣ Email — recuperação de senha
 // ======================================================================
-
 export async function sendPasswordResetEmail(params: {
   to: string;
   name?: string | null;
